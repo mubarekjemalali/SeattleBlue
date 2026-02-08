@@ -1,0 +1,41 @@
+
+spring:
+  datasource:
+    url: jdbc:postgresql://your-prod-host:5432/bookingAndDispatch
+    username: taxi_user
+    password: change_me
+    driver-class-name: org.postgresql.Driver
+#    datasource:
+#      url: ${DB_URL}
+#      username: ${DB_USER}
+#      password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+  mail:
+    host: smtp.yourprovider.com
+    port: 587
+    username: info@yourdomain.com
+    password: your_prod_password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  port: 8080
+
+
+app:
+  email:
+    enabled: true
+    provider: brevo
+    fromEmail: no-reply@yourdomain.com
+    fromName: Seattle Blue Cab
+    adminEmail: your-test-email@gmail.com
+    brevo:
+      apiKey: ${BREVO_API_KEY}

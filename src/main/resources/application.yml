@@ -1,0 +1,41 @@
+spring:
+  application:
+    name:
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/seattleblue
+    username: seattleblue_user
+    password: seattleblue_pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  sql:
+    init:
+      mode: never
+
+  profiles:
+    active: dev  # default profile
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+
+app:
+  email:
+    enabled: false # dev default: log only
+    provider: local # brevo | local
+    fromEmail: test@localhost"
+    fromName: "Seattle Blue Cab"
+    adminEmail: "dispatch@loclhost"
+    brevo:
+      apiKey: "" # set in prod using env var
+

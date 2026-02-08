@@ -1,0 +1,17 @@
+package com.seattleblue.booking;
+
+import com.seattleblue.booking.config.EmailProperties;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
+@SpringBootApplication
+@EnableConfigurationProperties(EmailProperties.class)
+public class BookingApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(BookingApplication.class, args);
+
+	}
+
+}

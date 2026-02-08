@@ -1,0 +1,42 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/seattleblue
+    username: seattleblue_user
+    password: seattleblue_pass
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+    h2:
+      console:
+        enabled: true
+        path: /h2-console
+
+#    mail:
+#      host: smtp.example.com   # TODO: replace with IONOS / SendGrid SMTP host
+#      port: 587
+#      username: info@yourdomain.com
+#      password: yourpassword
+#      properties:
+#        mail:
+#          smtp:
+#            auth: true
+#            starttls:
+#              enable: true
+
+app:
+  email:
+    test-on-startup: true
+    test-to-email: "mubijemal@gmail.com"
+    enabled: true
+    provider: brevo
+    from-email: tomyfreindmubi@gmail.com
+    from-name: Seattle Blue Cab
+    admin-email: your-test-email@gmail.com
+    brevo:
+      api-key: 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
+
+  server:
+    port: 8080
