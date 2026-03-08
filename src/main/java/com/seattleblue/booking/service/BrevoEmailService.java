@@ -81,10 +81,10 @@ public class BrevoEmailService implements EmailService {
     @Override
     public void sendCustomerDriverAssignedEmail(Driver driver, Booking booking) {
         send(
-                driver.getEmail(),
-                driver.getFirstName(),
-                "New Ride Assigned",
-                EmailTemplates.driverAssignedHtml(driver, booking)
+                booking.getCustomerEmail(),
+                booking.getCustomer().getFullName(),
+                "Your Driver Is Assigned",
+                EmailTemplates.customerDriverAssignedHtml(driver, booking)
         );
     }
 
@@ -100,7 +100,12 @@ public class BrevoEmailService implements EmailService {
 
     @Override
     public void sendDriverAssignedEmail(Driver driver, Booking booking) {
-
+        send(
+                driver.getEmail(),
+                driver.getFirstName(),
+                "New Ride Assigned",
+                EmailTemplates.driverAssignedHtml(driver, booking)
+        );
     }
 
     @Override

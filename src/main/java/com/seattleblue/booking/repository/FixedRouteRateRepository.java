@@ -16,8 +16,8 @@ import java.util.Optional;
 public interface FixedRouteRateRepository extends JpaRepository<FixedRouteRate, Long> {
 
     // Get all rates for a specific route (useful for admin panel)
-    List<FixedRouteRate> findByRoute(FixedRoute route);
+    List<FixedRouteRate> findByFixedRoute(FixedRoute fixedRoute);
 
     // When the customer selects a route + vehicle type, get the exact price
-    Optional<FixedRouteRate> findByRouteAndVehicleType(FixedRoute route, VehicleType vehicleType);
+    Optional<FixedRouteRate> findByFixedRouteAndVehicleType(FixedRoute fixedRoute, VehicleType vehicleType);
 }

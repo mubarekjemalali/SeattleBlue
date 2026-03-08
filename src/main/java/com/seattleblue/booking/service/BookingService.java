@@ -5,6 +5,7 @@ import com.seattleblue.booking.dto.BookingCancelResponseDTO;
 import com.seattleblue.booking.dto.BookingRequestDTO;
 import com.seattleblue.booking.dto.BookingResponseDTO;
 import com.seattleblue.booking.dto.BookingStatusResponseDTO;
+import com.seattleblue.booking.mapper.BookingMapper;
 import com.seattleblue.booking.repository.BookingRepository;
 import com.seattleblue.booking.repository.FixedRouteRateRepository;
 import com.seattleblue.booking.repository.FixedRouteRepository;
@@ -23,6 +24,7 @@ public class BookingService {
     private final FixedRouteRepository fixedRouteRepository;
     private final FixedRouteRateRepository fixedRouteRateRepository;
     private final EmailService emailService;
+    private final BookingMapper bookingMapper;
 
     public BookingResponseDTO createBooking(BookingRequestDTO dto) {
 
@@ -35,19 +37,8 @@ public class BookingService {
         );
 
         // 2. Create new booking entity
-        Booking booking = new Booking();
+        Booking booking = bookingMapper.toBooking(dto);
         booking.setCustomer(customer);
-
-        // Set location info
-        booking.setPickupAddress(dto.getPickupAddress());
-        booking.setPickupLat(dto.getPickupLat());
-        booking.setPickupLng(dto.getPickupLng());
-
-        booking.setDropoffAddress(dto.getDropoffAddress());
-        booking.setDropoffLat(dto.getDropoffLat());
-        booking.setDropoffLng(dto.getDropoffLng());
-
-        booking.setPickupTime(dto.getPickupTime());
 
         // 3. Customer snapshots
         booking.setCustomerFirstName(customer.getFirstName() != null ? customer.getFirstName() : "");
@@ -56,6 +47,8 @@ public class BookingService {
         booking.setCustomerPhoneNumber(customer.getPhoneNumber());
         booking.setCustomerEmail(customer.getEmail());
 
+        booking.setSelectedVehicleType(dto.getVehicleType());
+
         // 4. Fixed route pricing logic
         if (dto.getFixedRouteId() != null && dto.getVehicleType() != null) {
 
@@ -63,7 +56,7 @@ public class BookingService {
                     .orElseThrow(() -> new IllegalArgumentException("Invalid fixed route"));
 
             FixedRouteRate rate = fixedRouteRateRepository
-                    .findByRouteAndVehicleType(route, dto.getVehicleType())
+                    .findByFixedRouteAndVehicleType(route, dto.getVehicleType())
                     .orElseThrow(() -> new IllegalArgumentException("No pricing found"));
 
             booking.setFixedRoute(route);
@@ -82,39 +75,14 @@ public class BookingService {
         emailService.sendAdminNewBookingEmail(booking);
 
         // 8. Prepare response
-        BookingResponseDTO res = new BookingResponseDTO();
-        res.setBookingId(booking.getId());
-        res.setPublicToken(booking.getPublicToken());
-        res.setStatus(booking.getStatus());
-        res.setPickupAddress(booking.getPickupAddress());
-        res.setDropoffAddress(booking.getDropoffAddress());
-        res.setPickupTime(booking.getPickupTime());
-        res.setFixedRouteId(dto.getFixedRouteId());
-        res.setVehicleType(dto.getVehicleType());
-        res.setFixedRoutePrice(booking.getFixedRoutePrice());
-
-        return res;
+        return bookingMapper.toBookingResponse(booking);
     }
 
     public BookingStatusResponseDTO getStatusByPublicToken(String token) {
         Booking booking = bookingRepository.findByPublicToken(token)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid tracking token"));
 
-        BookingStatusResponseDTO dto = new BookingStatusResponseDTO();
-        dto.setBookingId(booking.getId());
-        dto.setStatus(booking.getStatus());
-        dto.setPickupAddress(booking.getPickupAddress());
-        dto.setDropoffAddress(booking.getDropoffAddress());
-        dto.setPickupTime(booking.getPickupTime());
-
-        // Driver assigned?
-        if (booking.getDriver() != null) {
-            Driver d = booking.getDriver();
-            dto.setDriverName(d.getFirstName() + " " + d.getLastName());
-            dto.setDriverVehicleType(d.getVehicle().getVehicleType());
-        }
-
-        return dto;
+        return bookingMapper.toBookingStatus(booking);
     }
 
     public BookingCancelResponseDTO cancelByPublicToken(String token, String reason) {
@@ -150,12 +118,7 @@ public class BookingService {
 // TODO: Send cancellation confirmation to the customer
 //        emailService.sendCustomerBookingCanelledEmail(booking);
 
-        BookingCancelResponseDTO dto = new BookingCancelResponseDTO();
-        dto.setBookingId(booking.getId());
-        dto.setStatus(booking.getStatus());
-        dto.setCancelledAt(booking.getCancelledAt());
-
-        return dto;
+        return bookingMapper.toBookingCancelResponse(booking);
     }
 
 

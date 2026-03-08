@@ -34,11 +34,16 @@ public final class BookingSpecifications {
             if (q == null || q.isBlank()) return cb.conjunction();
 
             String like = "%" + q.trim().toLowerCase() + "%";
+            var firstName = cb.lower(root.get("customerFirstName"));
+            var lastName = cb.lower(root.get("customerLastName"));
+            var fullName = cb.lower(cb.concat(cb.concat(root.get("customerFirstName"), " "), root.get("customerLastName")));
 
             return cb.or(
-                    cb.like(cb.lower(root.get("customerNameSnapshot")), like),
-                    cb.like(cb.lower(root.get("customerPhoneSnapshot")), like),
-                    cb.like(cb.lower(root.get("customerEmailSnapshot")), like)
+                    cb.like(firstName, like),
+                    cb.like(lastName, like),
+                    cb.like(fullName, like),
+                    cb.like(cb.lower(root.get("customerPhoneNumber")), like),
+                    cb.like(cb.lower(root.get("customerEmail")), like)
             );
         };
     }

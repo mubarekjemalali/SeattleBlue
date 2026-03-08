@@ -141,6 +141,29 @@ public class EmailTemplates {
         );
     }
 
+    public static String customerDriverAssignedHtml(Driver driver, Booking booking) {
+        return """
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Your driver has been assigned</h2>
+          <p>Hello %s,</p>
+          <p>Your ride is now assigned to a driver.</p>
+          <ul>
+            <li><b>Driver:</b> %s</li>
+            <li><b>Pickup:</b> %s</li>
+            <li><b>Drop-off:</b> %s</li>
+            <li><b>Pickup time:</b> %s</li>
+          </ul>
+          <p>Thank you for choosing Seattle Blue Cab.</p>
+        </div>
+        """.formatted(
+                safe(booking.getCustomer().getFullName()),
+                safe(driver.getFullName()),
+                safe(booking.getPickupAddress()),
+                safe(booking.getDropoffAddress()),
+                booking.getPickupTime() != null ? booking.getPickupTime().toString() : "N/A"
+        );
+    }
+
 
     // Local service can use these too if you want text versions:
     public static String customerBookingCreated(Booking b) { return strip(customerBookingCreatedHtml(b)); }

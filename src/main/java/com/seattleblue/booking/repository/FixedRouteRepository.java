@@ -14,5 +14,6 @@ public interface FixedRouteRepository extends JpaRepository<FixedRoute, Long> {
 
     // For showing available routes in the UI
     List<FixedRoute> findByActiveTrue();
+    boolean existsByNameIgnoreCase(String name);
 
 }

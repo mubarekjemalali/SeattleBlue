@@ -43,4 +43,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
 
     boolean existsByDriver_IdAndStatusAndIdNot(Long driverId, BookingStatus status, Long excludeBookingId);
 
+    boolean existsByDriver_IdAndStatus(Long driverId, BookingStatus status);
+
+
 }
