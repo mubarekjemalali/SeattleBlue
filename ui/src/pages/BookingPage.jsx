@@ -70,6 +70,7 @@ function toLongOrNull(value) {
   return Number.isFinite(n) ? n : null;
 }
 
+
 export default function BookingPage() {
   const navigate = useNavigate();
   const query = useQuery();
@@ -316,6 +317,23 @@ export default function BookingPage() {
     }
   };
 
+const handleManageBooking = () => {
+  const token = submitSuccess?.publicToken;
+  if (!token) return;
+  navigate(`/manage-booking?token=${encodeURIComponent(token)}`);
+};
+
+const handleBookAnotherRide = () => {
+  setSubmitSuccess(null);
+  setSubmitError("");
+  setFormErrorMessage("");
+  setErrors({});
+  setForm(INITIAL_FORM);
+  setFlat(INITIAL_FLAT);
+  setMode("standard");
+  scrollTop();
+};
+
   return (
     <div>
       <TopBar brand={brand} />
@@ -428,30 +446,80 @@ export default function BookingPage() {
             </div>
           )}
 
-          {submitSuccess && (
-            <div
-              className="card"
-              style={{
-                marginTop: 12,
-                padding: 12,
-                border: "1px solid #bbf7d0",
-                background: "#f0fdf4",
-              }}
-            >
-              <div style={{ fontWeight: 900, color: "#166534" }}>Booking submitted successfully</div>
-              <div className="muted" style={{ marginTop: 6 }}>
-                Your booking request was sent. We will contact you with driver details soon.
-              </div>
-              {submitSuccess.bookingId && (
-                <div style={{ marginTop: 8, fontWeight: 700, color: "#166534" }}>
-                  Booking ID: {submitSuccess.bookingId}
-                </div>
-              )}
+{/*           {submitSuccess && ( */}
+{/*             <div */}
+{/*               className="card" */}
+{/*               style={{ */}
+{/*                 marginTop: 12, */}
+{/*                 padding: 12, */}
+{/*                 border: "1px solid #bbf7d0", */}
+{/*                 background: "#f0fdf4", */}
+{/*               }} */}
+{/*             > */}
+{/*               <div style={{ fontWeight: 900, color: "#166534" }}>Booking submitted successfully</div> */}
+{/*               <div className="muted" style={{ marginTop: 6 }}> */}
+{/*                 Your booking request was sent. We will contact you with driver details soon. */}
+{/*               </div> */}
+{/*               {submitSuccess.bookingId && ( */}
+{/*                 <div style={{ marginTop: 8, fontWeight: 700, color: "#166534" }}> */}
+{/*                   Booking ID: {submitSuccess.bookingId} */}
+{/*                 </div> */}
+{/*               )} */}
+{/*             </div> */}
+{/*           )} */}
+
+
+        {submitSuccess && (
+          <div
+            className="card"
+            style={{
+              marginTop: 12,
+              padding: 16,
+              border: "1px solid #bbf7d0",
+              background: "#f0fdf4",
+              borderRadius: 16,
+            }}
+          >
+            <div style={{ fontWeight: 900, color: "#166534", fontSize: 18 }}>
+              Booking submitted successfully
             </div>
-          )}
+
+            <div className="muted" style={{ marginTop: 8, lineHeight: 1.6 }}>
+              Your booking request was sent successfully. We will assign a driver shortly and send you an email update.
+            </div>
+
+            {submitSuccess.publicToken && (
+              <div style={{ marginTop: 10, fontWeight: 700, color: "#166534" }}>
+                Booking reference: {submitSuccess.publicToken}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 14 }}>
+              {submitSuccess.publicToken && (
+                <button
+                  type="button"
+                  className="btn btnPrimary"
+                  onClick={handleManageBooking}
+                >
+                  Manage Booking
+                </button>
+              )}
+
+              <button
+                type="button"
+                className="btn btnGhost"
+                onClick={handleBookAnotherRide}
+              >
+                Book Another Ride
+              </button>
+            </div>
+          </div>
+        )}
+
         </div>
       </section>
 
+{!submitSuccess && (
       <section className="section">
         <div className="container">
           <form onSubmit={handleSubmit} className="grid" style={{ gap: 16 }}>
@@ -613,6 +681,7 @@ export default function BookingPage() {
           </form>
         </div>
       </section>
+      )}
 
       <Footer brand={brand} />
     </div>

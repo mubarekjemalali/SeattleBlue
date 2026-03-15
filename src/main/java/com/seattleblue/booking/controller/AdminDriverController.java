@@ -4,11 +4,13 @@ import com.seattleblue.booking.domain.VehicleType;
 import com.seattleblue.booking.dto.CreateDriverRequestDto;
 import com.seattleblue.booking.dto.DriverResponseDto;
 import com.seattleblue.booking.dto.UpdateDriverEnabledRequestDto;
+import com.seattleblue.booking.dto.UpdateDriverRequestDto;
 import com.seattleblue.booking.service.admin.AdminDriverService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -64,6 +66,23 @@ public class AdminDriverController {
         return adminDriverService.updateDriverEnabled(driverId, request.getEnabled());
     }
 
+    /**
+     * Get one driver by id.
+     */
+    @GetMapping("/{driverId}")
+    public DriverResponseDto getDriverById(@PathVariable Long driverId) {
+        return adminDriverService.getDriverById(driverId);
+    }
 
+    /**
+     * Update/edit a driver and vehicle details.
+     */
+    @PutMapping("/{driverId}")
+    public DriverResponseDto updateDriver(
+            @PathVariable Long driverId,
+            @Valid @RequestBody UpdateDriverRequestDto request
+    ) {
+        return adminDriverService.updateDriver(driverId, request);
+    }
 
 }

@@ -24,6 +24,7 @@ public class DriverResponseDto {
     Long vehicleId;
     VehicleType vehicleType;
     String vehiclePlate;
+    String sideNumber;
     String make;
     String model;
     Integer year;

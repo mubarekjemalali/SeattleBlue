@@ -58,6 +58,7 @@ export function listAdminBookings({
   return httpJson(`/api/admin/bookings?${qs.toString()}`, { method: "GET" });
 }
 
+// COMPLETING BOOKING
 export async function completeAdminBooking(bookingId) {
   const res = await fetch(`/api/admin/bookings/${bookingId}/complete`, {
     method: "PUT",
@@ -76,6 +77,34 @@ export async function completeAdminBooking(bookingId) {
   }
 
   // if backend returns JSON, keep this:
+  try {
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+//CANCEL BOOKING
+export async function cancelAdminBooking(bookingId, cancellationReason) {
+  const res = await fetch(`/api/admin/bookings/${bookingId}/cancel`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      cancellationReason,
+    }),
+  });
+
+  if (!res.ok) {
+    let message = "Failed to cancel booking.";
+    try {
+      const data = await res.json();
+      message = data?.message || message;
+    } catch {}
+    throw new Error(message);
+  }
+
   try {
     return await res.json();
   } catch {

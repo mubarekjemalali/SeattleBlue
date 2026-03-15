@@ -115,8 +115,8 @@ public class BookingService {
             emailService.sendDriverBookingCancelledEmail(booking.getDriver(), booking);
         }
 
-// TODO: Send cancellation confirmation to the customer
-//        emailService.sendCustomerBookingCanelledEmail(booking);
+ //TODO: Send cancellation confirmation to the customer
+        emailService.sendCustomerBookingCanelledEmail(booking);
 
         return bookingMapper.toBookingCancelResponse(booking);
     }

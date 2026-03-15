@@ -6,6 +6,7 @@ import com.seattleblue.booking.domain.Vehicle;
 import com.seattleblue.booking.domain.VehicleType;
 import com.seattleblue.booking.dto.CreateDriverRequestDto;
 import com.seattleblue.booking.dto.DriverResponseDto;
+import com.seattleblue.booking.dto.UpdateDriverRequestDto;
 import com.seattleblue.booking.repository.BookingRepository;
 import com.seattleblue.booking.repository.DriverRepository;
 import com.seattleblue.booking.repository.VehicleRepository;
@@ -105,6 +106,57 @@ public class AdminDriverService {
         return toDto(saved);
     }
 
+    @Transactional(readOnly = true)
+    public DriverResponseDto getDriverById(Long driverId) {
+        Driver driver = driverRepository.findById(driverId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Driver not found"));
+
+        return toDto(driver);
+    }
+
+    @Transactional
+    public DriverResponseDto updateDriver(Long driverId, UpdateDriverRequestDto req) {
+
+        Driver driver = driverRepository.findById(driverId)
+                .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Driver not found"));
+
+        // Prevent duplicate phone number on another driver
+        boolean phoneExistsOnAnotherDriver = driverRepository.findAll().stream()
+                .anyMatch(d ->
+                        !d.getId().equals(driverId) &&
+                                d.getPhoneNumber() != null &&
+                                d.getPhoneNumber().equals(req.getPhoneNumber())
+                );
+
+        if (phoneExistsOnAnotherDriver) {
+            throw new ResponseStatusException(CONFLICT, "Driver phone number already exists");
+        }
+
+        driver.setFirstName(req.getFirstName());
+        driver.setLastName(req.getLastName());
+        driver.setPhoneNumber(req.getPhoneNumber());
+        driver.setEmail(req.getEmail());
+
+        Vehicle vehicle = driver.getVehicle();
+        if (vehicle == null) {
+            vehicle = new Vehicle();
+        }
+
+        vehicle.setVehicleType(req.getVehicle().getVehicleType());
+        vehicle.setPlateNumber(req.getVehicle().getVehiclePlate());
+        vehicle.setSideNumber(req.getVehicle().getSideNumber());
+        vehicle.setMake(req.getVehicle().getMake());
+        vehicle.setModel(req.getVehicle().getModel());
+        vehicle.setYear(req.getVehicle().getYear());
+
+        vehicle = vehicleRepository.save(vehicle);
+        driver.setVehicle(vehicle);
+
+        Driver saved = driverRepository.save(driver);
+
+        return toDto(saved);
+    }
+
 
     private DriverResponseDto toDto(Driver d) {
         Vehicle v = d.getVehicle();
@@ -120,6 +172,7 @@ public class AdminDriverService {
                 .vehicleId(v == null ? null : v.getId())
                 .vehicleType(v == null ? null : v.getVehicleType())
                 .vehiclePlate(v == null ? null : v.getPlateNumber())
+                .sideNumber(v == null ? null : v.getSideNumber())
                 .make(v == null ? null : v.getMake())
                 .model(v == null ? null : v.getModel())
                 .year(v == null ? null : v.getYear())

@@ -23,7 +23,7 @@ public class AdminBookingService {
 
     @Transactional(readOnly = true)
     public Page<AdminBookingSummaryDto> listBookings(
-            BookingStatus status,
+            String status,
             LocalDateTime from,
             LocalDateTime to,
             String q,

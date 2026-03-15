@@ -39,3 +39,4 @@ app:
     adminEmail: your-test-email@gmail.com
     brevo:
       apiKey: ${BREVO_API_KEY}
+  frontend-base-url:

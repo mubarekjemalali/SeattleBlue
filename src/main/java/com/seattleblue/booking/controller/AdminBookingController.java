@@ -26,7 +26,7 @@ public class AdminBookingController {
      */
     @GetMapping
     public Page<AdminBookingSummaryDto> listBookings(
-            @RequestParam(required = false) BookingStatus status,
+            @RequestParam(required = false) String status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to,
             @RequestParam(required = false) String q,

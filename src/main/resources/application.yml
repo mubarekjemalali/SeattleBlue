@@ -38,4 +38,5 @@ app:
     adminEmail: "dispatch@loclhost"
     brevo:
       apiKey: "" # set in prod using env var
+    frontend-base-url: http://localhost:5173
 

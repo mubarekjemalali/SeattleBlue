@@ -10,10 +10,34 @@ public final class BookingSpecifications {
 
     private BookingSpecifications() {}
 
-    public static Specification<Booking> hasStatus(BookingStatus status) {
-        return (root, query, cb) ->
-                status == null ? cb.conjunction() : cb.equal(root.get("status"), status);
-    }
+//    public static Specification<Booking> hasStatus(String status) {
+//        return (root, query, cb) ->
+//                status == null ? cb.conjunction() : cb.equal(root.get("status"), status);
+//    }
+public static Specification<Booking> hasStatus(String status) {
+    return (root, query, cb) -> {
+        if (status == null || status.isBlank()) {
+            return cb.conjunction();
+        }
+
+        String normalized = status.trim().toUpperCase();
+
+        if ("CANCELLED".equals(normalized)) {
+            return root.get("status").in(
+                    BookingStatus.CANCELLED_BY_CUSTOMER,
+                    BookingStatus.CANCELLED_BY_DISPATCHER
+            );
+        }
+
+        try {
+            BookingStatus bookingStatus = BookingStatus.valueOf(normalized);
+            return cb.equal(root.get("status"), bookingStatus);
+        } catch (IllegalArgumentException ex) {
+            // Unknown status value: return no rows instead of throwing
+            return cb.disjunction();
+        }
+    };
+}
 
     public static Specification<Booking> pickupTimeFrom(LocalDateTime from) {
         return (root, query, cb) ->

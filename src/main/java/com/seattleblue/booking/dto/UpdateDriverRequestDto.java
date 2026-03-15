@@ -5,13 +5,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
-/**
- * Admin request for creating a driver with vehicle details.
- */
 @Data
-public class CreateDriverRequestDto {
+public class UpdateDriverRequestDto {
 
-    // Driver
     @NotBlank
     private String firstName;
 
@@ -24,7 +20,6 @@ public class CreateDriverRequestDto {
     @Email
     private String email; // optional
 
-    // Vehicle details (required for assignment workflows)
     @Valid
     @NotNull
     private VehicleDto vehicle;
@@ -36,14 +31,14 @@ public class CreateDriverRequestDto {
 
         @NotBlank
         private String vehiclePlate;
-
         private String sideNumber; // optional
 
-        private String make;   // optional
-        private String model;  // optional
+
+        private String make;
+        private String model;
 
         @Min(1980)
         @Max(2100)
-        private Integer year;  // optional
+        private Integer year;
     }
 }

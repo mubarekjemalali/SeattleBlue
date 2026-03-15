@@ -21,5 +21,5 @@ public interface DriverRepository extends JpaRepository<Driver, Long>, JpaSpecif
     List<Driver> findByVehicle_VehicleType(VehicleType vehicleType);
     List<Driver> findByEnabledTrueAndVehicle_VehicleType(VehicleType vehicleType);
     boolean existsByPhoneNumber(String phoneNumber);
-
+    boolean existsByPhoneNumberAndIdNot(String phoneNumber, Long id);
 }

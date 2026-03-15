@@ -1,809 +1,12 @@
-// import { useEffect, useMemo, useState } from "react";
-// import TopBar from "../../components/TopBar";
-// import Navbar from "../../components/Navbar";
-// import Footer from "../../components/Footer";
-// import { listAdminBookings } from "../../api/adminBookingsApi";
-//
-// function formatDateTime(dt) {
-//   if (!dt) return "";
-//   try {
-//     const d = new Date(dt);
-//     if (!Number.isNaN(d.getTime())) return d.toLocaleString();
-//   } catch {}
-//   return String(dt);
-// }
-//
-// const compactInputStyle = {
-//   height: 44,
-//   borderRadius: 12,
-//   border: "1px solid var(--border)",
-//   padding: "10px 12px",
-//   background: "#fff",
-//   color: "var(--text)",
-// };
-//
-// function shortAddress(s) {
-//   if (!s) return "";
-//   return s.length > 34 ? s.slice(0, 34) + "…" : s;
-// }
-//
-// function toIsoLocalDateTime(dateTimeLocalStr) {
-//   // input type="datetime-local" gives "YYYY-MM-DDTHH:mm"
-//   // backend expects ISO date-time; sending without seconds usually still works,
-//   // but to be safe add ":00"
-//   if (!dateTimeLocalStr) return "";
-//   return dateTimeLocalStr.length === 16 ? `${dateTimeLocalStr}:00` : dateTimeLocalStr;
-// }
-//
-// function statusBadgeStyle(status) {
-//   const base = {
-//     padding: "4px 10px",
-//     borderRadius: 999,
-//     fontSize: 12,
-//     fontWeight: 900,
-//     display: "inline-block",
-//     border: "1px solid var(--border)",
-//   };
-//
-//   switch (status) {
-//     case "COMPLETED":
-//       return { ...base, background: "#ecfdf5", color: "#166534", border: "1px solid #bbf7d0" };
-//     case "CANCELLED":
-//       return { ...base, background: "#fff5f5", color: "#b91c1c", border: "1px solid #fecaca" };
-//     case "ASSIGNED":
-//       return { ...base, background: "var(--blue-50)", color: "var(--blue-900)" };
-//     case "CREATED":
-//       return { ...base, background: "#fff", color: "var(--text)" };
-//     default:
-//       return { ...base, background: "#fff", color: "var(--text)" };
-//   }
-// }
-//
-// export default function AdminDashboardPage() {
-//   const brand = useMemo(
-//     () => ({
-//       companyName: "Seattle Blue Cab",
-//       phoneDisplay: "(206) 555-0123",
-//       phoneDial: "+12065550123",
-//       email: "info@seattlebluecab.com",
-//       addressShort: "Seattle, WA",
-//       socials: { facebook: "#", instagram: "#", x: "#" },
-//     }),
-//     []
-//   );
-//
-//   // Tabs: these are UI groupings
-//   const [tab, setTab] = useState("ACTIVE"); // ACTIVE | COMPLETED | ALL
-//
-//   // Because backend only accepts ONE status at a time, we map tabs to a default status.
-//   // Admin can override using the status dropdown.
-//   const defaultStatusForTab = (t) => {
-//     if (t === "COMPLETED") return "COMPLETED";
-//     if (t === "ACTIVE") return "CREATED"; // Active can mean multiple statuses, but backend takes one; we start with CREATED.
-//     return ""; // ALL
-//   };
-//
-//   // Filters that backend supports
-//   const [status, setStatus] = useState(defaultStatusForTab("ACTIVE"));
-//   const [q, setQ] = useState("");
-//   const [fromLocal, setFromLocal] = useState("");
-//   const [toLocal, setToLocal] = useState("");
-//   // Compact filter bar UX
-//   const [filtersOpen, setFiltersOpen] = useState(false); // collapsed by default
-//
-//   // Auto-collapse Filters on small screens
-//   useEffect(() => {
-//     const mq = window.matchMedia("(max-width: 768px)");
-//
-//     const apply = () => {
-//       if (mq.matches) setFiltersOpen(false);
-//     };
-//
-//     apply();
-//
-//     if (mq.addEventListener) mq.addEventListener("change", apply);
-//     else mq.addListener(apply);
-//
-//     return () => {
-//       if (mq.removeEventListener) mq.removeEventListener("change", apply);
-//       else mq.removeListener(apply);
-//     };
-//   }, []);
-//
-//   // Paging
-//   const [page, setPage] = useState(0);
-//   const [size] = useState(20);
-//   const sort = "pickupTime,desc";
-//
-//   // Data
-//   const [pageData, setPageData] = useState(null); // Spring Page object
-//
-//   // UI
-//   const [loading, setLoading] = useState(false);
-//   const [error, setError] = useState("");
-//   const [info, setInfo] = useState("");
-//
-//   const load = async ({ resetPage = false } = {}) => {
-//     setLoading(true);
-//     setError("");
-//     setInfo("");
-//
-//     try {
-//       const nextPage = resetPage ? 0 : page;
-//
-//       const res = await listAdminBookings({
-//         status: status || undefined,
-//         from: fromLocal ? toIsoLocalDateTime(fromLocal) : undefined,
-//         to: toLocal ? toIsoLocalDateTime(toLocal) : undefined,
-//         q: q || undefined,
-//         page: nextPage,
-//         size,
-//         sort,
-//       });
-//
-//       setPageData(res);
-//       if (resetPage) setPage(0);
-//     } catch (e) {
-//       setError(e?.message || "Failed to load bookings.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-//
-//   // When tab changes, reset status defaults + reload
-//   useEffect(() => {
-//     const s = defaultStatusForTab(tab);
-//     setStatus(s);
-//     setPage(0);
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [tab]);
-//
-//   // When status is updated (like after tab change), reload page 0
-//   useEffect(() => {
-//     load({ resetPage: true });
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [status]);
-//
-//   const clearFilters = () => {
-//     setQ("");
-//     setFromLocal("");
-//     setToLocal("");
-//     setInfo("Filters cleared.");
-//     setPage(0);
-//     setTimeout(() => load({ resetPage: true }), 0);
-//   };
-//
-//   const onApplyFilters = (e) => {
-//     e.preventDefault();
-//     load({ resetPage: true });
-//   };
-//
-//   const bookings = pageData?.content || [];
-//   const totalElements = pageData?.totalElements ?? 0;
-//   const totalPages = pageData?.totalPages ?? 0;
-//   const currentPage = pageData?.number ?? page;
-//
-//   const canPrev = currentPage > 0;
-//   const canNext = totalPages ? currentPage < totalPages - 1 : bookings.length === size;
-//
-//   return (
-//     <div>
-//       <TopBar brand={brand} />
-//       <Navbar brand={brand} />
-//
-// {/*       <section className="section" style={{ background: "linear-gradient(180deg, var(--blue-50), #ffffff)" }}> */}
-// {/*         <div className="container"> */}
-// {/*           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}> */}
-// {/*             <div> */}
-// {/*               <div className="kicker">Admin</div> */}
-// {/*               <h1 className="h1" style={{ marginBottom: 6 }}>Dashboard</h1> */}
-// {/*               <div className="muted" style={{ lineHeight: 1.6 }}> */}
-// {/*                 View dispatcher bookings. Filters match the existing backend endpoint. */}
-// {/*               </div> */}
-// {/*             </div> */}
-//
-// {/*             <button className="btn btnGhost" onClick={() => load()} disabled={loading}> */}
-// {/*               {loading ? "Refreshing..." : "Refresh"} */}
-// {/*             </button> */}
-// {/*           </div> */}
-//
-// {/*            */}{/* Tabs */}
-// {/*           <div className="card" style={{ marginTop: 16, padding: 10, display: "flex", gap: 10, borderRadius: 16, flexWrap: "wrap" }}> */}
-// {/*             {[ */}
-// {/*               { key: "ACTIVE", label: "Active (default: CREATED)" }, */}
-// {/*               { key: "COMPLETED", label: "Completed" }, */}
-// {/*               { key: "ALL", label: "All" }, */}
-// {/*             ].map((t) => ( */}
-// {/*               <button */}
-// {/*                 key={t.key} */}
-// {/*                 type="button" */}
-// {/*                 className="btn" */}
-// {/*                 onClick={() => setTab(t.key)} */}
-// {/*                 style={{ */}
-// {/*                   flex: 1, */}
-// {/*                   minWidth: 160, */}
-// {/*                   background: tab === t.key ? "var(--blue-900)" : "transparent", */}
-// {/*                   color: tab === t.key ? "#fff" : "var(--text)", */}
-// {/*                   border: tab === t.key ? "0" : "1px solid var(--border)", */}
-// {/*                 }} */}
-// {/*               > */}
-// {/*                 {t.label} */}
-// {/*               </button> */}
-// {/*             ))} */}
-// {/*           </div> */}
-//
-// {/*            */}{/* Messages */}
-// {/*           {error && ( */}
-// {/*             <div className="card" style={{ marginTop: 12, padding: 12, border: "1px solid #fecaca", background: "#fff5f5" }}> */}
-// {/*               <div style={{ fontWeight: 800, color: "#b91c1c" }}>Error</div> */}
-// {/*               <div style={{ color: "#7f1d1d", marginTop: 4 }}>{error}</div> */}
-// {/*             </div> */}
-// {/*           )} */}
-//
-// {/*           {info && !error && ( */}
-// {/*             <div className="card" style={{ marginTop: 12, padding: 12, border: "1px solid #bbf7d0", background: "#f0fdf4" }}> */}
-// {/*               <div style={{ fontWeight: 900, color: "#166534" }}>OK</div> */}
-// {/*               <div className="muted" style={{ marginTop: 4 }}>{info}</div> */}
-// {/*             </div> */}
-// {/*           )} */}
-// {/*         </div> */}
-// {/*       </section> */}
-//
-// {/*       <section className="section"> */}
-// {/*         <div className="container" style={{ display: "grid", gap: 16 }}> */}
-// {/*            */}{/* Filters */}
-//
-// {/*           <form */}
-// {/*             onSubmit={onApplyFilters} */}
-// {/*             className="card" */}
-// {/*             style={{ */}
-// {/*               padding: 10, */}
-// {/*               borderRadius: 16, */}
-// {/*               display: "flex", */}
-// {/*               gap: 10, */}
-// {/*               flexWrap: "wrap", */}
-// {/*               alignItems: "center", */}
-// {/*             }} */}
-// {/*           > */}
-// {/*              */}{/* Toggle (acts like a tab button) */}
-// {/*             <button */}
-// {/*               type="button" */}
-// {/*               className="btn" */}
-// {/*               onClick={() => setFiltersOpen((v) => !v)} */}
-// {/*               style={{ */}
-// {/*                 minWidth: 140, */}
-// {/*                 background: filtersOpen ? "var(--blue-900)" : "transparent", */}
-// {/*                 color: filtersOpen ? "#fff" : "var(--text)", */}
-// {/*                 border: filtersOpen ? "0" : "1px solid var(--border)", */}
-// {/*                 fontWeight: 900, */}
-// {/*               }} */}
-// {/*             > */}
-// {/*               Filters {filtersOpen ? "▲" : "▼"} */}
-// {/*             </button> */}
-//
-// {/*              */}{/* Quick status control always visible */}
-// {/*             <div style={{ minWidth: 220, flex: 1 }}> */}
-// {/*               <select */}
-// {/*                 className="input" */}
-// {/*                 style={compactInputStyle} */}
-// {/*                 value={status} */}
-// {/*                 onChange={(e) => setStatus(e.target.value)} */}
-// {/*               > */}
-// {/*                 <option value="">(All statuses)</option> */}
-// {/*                 <option value="CREATED">CREATED</option> */}
-// {/*                 <option value="ASSIGNED">ASSIGNED</option> */}
-// {/*                 <option value="COMPLETED">COMPLETED</option> */}
-// {/*                 <option value="CANCELLED">CANCELLED</option> */}
-// {/*               </select> */}
-// {/*             </div> */}
-//
-// {/*              */}{/* Apply / Clear (always visible) */}
-// {/*             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}> */}
-// {/*               <button type="button" className="btn btnGhost" onClick={clearFilters}> */}
-// {/*                 Clear */}
-// {/*               </button> */}
-// {/*               <button type="submit" className="btn btnPrimary" disabled={loading}> */}
-// {/*                 {loading ? "Applying..." : "Apply"} */}
-// {/*               </button> */}
-// {/*             </div> */}
-//
-// {/*              */}{/* Collapsible advanced filters */}
-// {/*             {filtersOpen && ( */}
-// {/*               <div */}
-// {/*                 className="grid grid2" */}
-// {/*                 style={{ */}
-// {/*                   width: "100%", */}
-// {/*                   gap: 12, */}
-// {/*                   marginTop: 10, */}
-// {/*                 }} */}
-// {/*               > */}
-// {/*                 <div> */}
-//
-// {/*                   <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>Search (customer / phone / email)</div> */}
-// {/*                   <input */}
-// {/*                     className="input" */}
-// {/*                     style={compactInputStyle} */}
-// {/*                     value={q} */}
-// {/*                     onChange={(e) => setQ(e.target.value)} */}
-// {/*                     placeholder="Type to search…" */}
-// {/*                   /> */}
-// {/*                 </div> */}
-//
-// {/*                 <div> */}
-//
-// {/*                   <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>From</div> */}
-// {/*                   <input */}
-// {/*                     className="input" */}
-// {/*                     style={compactInputStyle} */}
-// {/*                     type="datetime-local" */}
-// {/*                     value={fromLocal} */}
-// {/*                     onChange={(e) => setFromLocal(e.target.value)} */}
-// {/*                   /> */}
-// {/*                 </div> */}
-//
-// {/*                 <div> */}
-// {/*                   <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>To</div> */}
-// {/*                   <input */}
-// {/*                     className="input" */}
-// {/*                     style={compactInputStyle} */}
-// {/*                     type="datetime-local" */}
-// {/*                     value={toLocal} */}
-// {/*                     onChange={(e) => setToLocal(e.target.value)} */}
-// {/*                   /> */}
-// {/*                 </div> */}
-//
-// {/*                 <div> */}
-// {/*                   <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>Driver</div> */}
-// {/*                   <input */}
-// {/*                     className="input" */}
-// {/*                     style={compactInputStyle} */}
-// {/*                     value="" */}
-// {/*                     disabled */}
-// {/*                     placeholder="Driver filter (coming soon)" */}
-// {/*                   /> */}
-// {/*                 </div> */}
-// {/*               </div> */}
-// {/*             )} */}
-// {/*           </form> */}
-//
-//
-// {/*            */}{/* Table */}
-// {/*           <div className="card" style={{ padding: 16 }}> */}
-// {/*             <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap", alignItems: "center" }}> */}
-// {/*               <div> */}
-// {/*                 <div style={{ fontWeight: 900 }}>Bookings</div> */}
-// {/*                 <div className="muted" style={{ marginTop: 4 }}> */}
-// {/*                   {loading ? "Loading…" : `${bookings.length} on this page • ${totalElements} total`} */}
-// {/*                 </div> */}
-// {/*               </div> */}
-//
-//              <section
-//                className="section"
-//                style={{ background: "linear-gradient(180deg, var(--blue-50), #ffffff)" }}
-//              >
-//                <div className="container">
-//                  <div
-//                    style={{
-//                      display: "flex",
-//                      justifyContent: "space-between",
-//                      gap: 12,
-//                      flexWrap: "wrap",
-//                    }}
-//                  >
-//                    <div>
-//                      <div className="kicker">Admin</div>
-//                      <h1 className="h1" style={{ marginBottom: 6 }}>
-//                        Dashboard
-//                      </h1>
-//                      <div className="muted" style={{ lineHeight: 1.6 }}>
-//                        View dispatcher bookings. Filters match the existing backend endpoint.
-//                      </div>
-//                    </div>
-//
-//                    <button className="btn btnGhost" onClick={() => load()} disabled={loading}>
-//                      {loading ? "Refreshing..." : "Refresh"}
-//                    </button>
-//                  </div>
-//
-//                  {/* Tabs */}
-//                  <div
-//                    className="card"
-//                    style={{
-//                      marginTop: 16,
-//                      padding: 10,
-//                      display: "flex",
-//                      gap: 10,
-//                      borderRadius: 16,
-//                      flexWrap: "wrap",
-//                    }}
-//                  >
-//                    {[
-//                      { key: "ACTIVE", label: "Active (default: CREATED)" },
-//                      { key: "COMPLETED", label: "Completed" },
-//                      { key: "ALL", label: "All" },
-//                    ].map((t) => (
-//                      <button
-//                        key={t.key}
-//                        type="button"
-//                        className="btn"
-//                        onClick={() => setTab(t.key)}
-//                        style={{
-//                          flex: 1,
-//                          minWidth: 160,
-//                          background: tab === t.key ? "var(--blue-900)" : "transparent",
-//                          color: tab === t.key ? "#fff" : "var(--text)",
-//                          border: tab === t.key ? "0" : "1px solid var(--border)",
-//                        }}
-//                      >
-//                        {t.label}
-//                      </button>
-//                    ))}
-//                  </div>
-//
-//                  {/* ✅ Messages REMOVED from here (moved below into section 2) */}
-//                </div>
-//              </section>
-//
-//              {/* ✅ Remove the double-section padding gap */}
-//              <section className="section" style={{ paddingTop: 0 }}>
-//                <div className="container" style={{ display: "grid", gap: 12 }}>
-//                  {/* ✅ Messages appear only when present, and sit between tabs and filters */}
-//                  {error && (
-//                    <div
-//                      className="card"
-//                      style={{
-//                        padding: 12,
-//                        border: "1px solid #fecaca",
-//                        background: "#fff5f5",
-//                      }}
-//                    >
-//                      <div style={{ fontWeight: 800, color: "#b91c1c" }}>Error</div>
-//                      <div style={{ color: "#7f1d1d", marginTop: 4 }}>{error}</div>
-//                    </div>
-//                  )}
-//
-//                  {info && !error && (
-//                    <div
-//                      className="card"
-//                      style={{
-//                        padding: 12,
-//                        border: "1px solid #bbf7d0",
-//                        background: "#f0fdf4",
-//                      }}
-//                    >
-//                      <div style={{ fontWeight: 900, color: "#166534" }}>OK</div>
-//                      <div className="muted" style={{ marginTop: 4 }}>
-//                        {info}
-//                      </div>
-//                    </div>
-//                  )}
-//
-//                  {/* Filters */}
-//                  <form
-//                    onSubmit={onApplyFilters}
-//                    className="card"
-//                    style={{
-//                      padding: 10,
-//                      borderRadius: 16,
-//                      display: "flex",
-//                      gap: 10,
-//                      flexWrap: "wrap",
-//                      alignItems: "center",
-//                    }}
-//                  >
-//                    {/* Toggle (acts like a tab button) */}
-//                    <button
-//                      type="button"
-//                      className="btn"
-//                      onClick={() => setFiltersOpen((v) => !v)}
-//                      style={{
-//                        minWidth: 140,
-//                        background: filtersOpen ? "var(--blue-900)" : "transparent",
-//                        color: filtersOpen ? "#fff" : "var(--text)",
-//                        border: filtersOpen ? "0" : "1px solid var(--border)",
-//                        fontWeight: 900,
-//                      }}
-//                    >
-//                      Filters {filtersOpen ? "▲" : "▼"}
-//                    </button>
-//
-//                    {/* Quick status control always visible */}
-//                    <div style={{ minWidth: 220, flex: 1 }}>
-//                      <select
-//                        className="input"
-//                        style={compactInputStyle}
-//                        value={status}
-//                        onChange={(e) => setStatus(e.target.value)}
-//                      >
-//                        <option value="">(All statuses)</option>
-//                        <option value="CREATED">CREATED</option>
-//                        <option value="ASSIGNED">ASSIGNED</option>
-//                        <option value="COMPLETED">COMPLETED</option>
-//                        <option value="CANCELLED">CANCELLED</option>
-//                      </select>
-//                    </div>
-//
-//                    {/* Apply / Clear (always visible) */}
-//                    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-//                      <button
-//                        type="button"
-//                        className="btn btnGhost"
-//                        onClick={clearFilters}
-//                      >
-//                        Clear
-//                      </button>
-//                      <button type="submit" className="btn btnPrimary" disabled={loading}>
-//                        {loading ? "Applying..." : "Apply"}
-//                      </button>
-//                    </div>
-//
-//                    {/* Collapsible advanced filters */}
-//                    {filtersOpen && (
-//                      <div
-//                        className="grid grid2"
-//                        style={{
-//                          width: "100%",
-//                          gap: 12,
-//                          marginTop: 10,
-//                        }}
-//                      >
-//                        <div>
-//                          <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>
-//                            Search (customer / phone / email)
-//                          </div>
-//                          <input
-//                            className="input"
-//                            style={compactInputStyle}
-//                            value={q}
-//                            onChange={(e) => setQ(e.target.value)}
-//                            placeholder="Type to search…"
-//                          />
-//                        </div>
-//
-//                        <div>
-//                          <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>
-//                            From
-//                          </div>
-//                          <input
-//                            className="input"
-//                            style={compactInputStyle}
-//                            type="datetime-local"
-//                            value={fromLocal}
-//                            onChange={(e) => setFromLocal(e.target.value)}
-//                          />
-//                        </div>
-//
-//                        <div>
-//                          <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>
-//                            To
-//                          </div>
-//                          <input
-//                            className="input"
-//                            style={compactInputStyle}
-//                            type="datetime-local"
-//                            value={toLocal}
-//                            onChange={(e) => setToLocal(e.target.value)}
-//                          />
-//                        </div>
-//
-//                        <div>
-//                          <div className="muted" style={{ fontSize: 12, fontWeight: 800 }}>
-//                            Driver
-//                          </div>
-//                          <input
-//                            className="input"
-//                            style={compactInputStyle}
-//                            value=""
-//                            disabled
-//                            placeholder="Driver filter (coming soon)"
-//                          />
-//                        </div>
-//                      </div>
-//                    )}
-//                  </form>
-//
-//                  {/* Table */}
-//                  <div className="card" style={{ padding: 16 }}>
-//                    <div
-//                      style={{
-//                        display: "flex",
-//                        justifyContent: "space-between",
-//                        gap: 12,
-//                        flexWrap: "wrap",
-//                        alignItems: "center",
-//                      }}
-//                    >
-//                      <div>
-//                        <div style={{ fontWeight: 900 }}>Bookings</div>
-//                        <div className="muted" style={{ marginTop: 4 }}>
-//                          {loading ? "Loading…" : `${bookings.length} on this page • ${totalElements} total`}
-//                        </div>
-//                      </div>
-//
-//               {/* Paging controls */}
-//               <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
-//                 <button
-//                   type="button"
-//                   className="btn btnGhost"
-//                   disabled={!canPrev || loading}
-//                   onClick={() => {
-//                     const next = Math.max(0, currentPage - 1);
-//                     setPage(next);
-//                     // load using set state page: call directly with override
-//                     setTimeout(async () => {
-//                       setLoading(true);
-//                       try {
-//                         const res = await listAdminBookings({
-//                           status: status || undefined,
-//                           from: fromLocal ? toIsoLocalDateTime(fromLocal) : undefined,
-//                           to: toLocal ? toIsoLocalDateTime(toLocal) : undefined,
-//                           q: q || undefined,
-//                           page: next,
-//                           size,
-//                           sort,
-//                         });
-//                         setPageData(res);
-//                       } catch (e) {
-//                         setError(e?.message || "Failed to load bookings.");
-//                       } finally {
-//                         setLoading(false);
-//                       }
-//                     }, 0);
-//                   }}
-//                 >
-//                   ← Prev
-//                 </button>
-//
-//                 <div className="muted" style={{ fontSize: 13 }}>
-//                   Page {totalPages ? currentPage + 1 : currentPage + 1}
-//                   {totalPages ? ` / ${totalPages}` : ""}
-//                 </div>
-//
-//                 <button
-//                   type="button"
-//                   className="btn btnGhost"
-//                   disabled={!canNext || loading}
-//                   onClick={() => {
-//                     const next = currentPage + 1;
-//                     setPage(next);
-//                     setTimeout(async () => {
-//                       setLoading(true);
-//                       try {
-//                         const res = await listAdminBookings({
-//                           status: status || undefined,
-//                           from: fromLocal ? toIsoLocalDateTime(fromLocal) : undefined,
-//                           to: toLocal ? toIsoLocalDateTime(toLocal) : undefined,
-//                           q: q || undefined,
-//                           page: next,
-//                           size,
-//                           sort,
-//                         });
-//                         setPageData(res);
-//                       } catch (e) {
-//                         setError(e?.message || "Failed to load bookings.");
-//                       } finally {
-//                         setLoading(false);
-//                       }
-//                     }, 0);
-//                   }}
-//                 >
-//                   Next →
-//                 </button>
-//               </div>
-//             </div>
-//
-//             <div style={{ marginTop: 12, overflowX: "auto" }}>
-//               <table style={{ width: "100%", borderCollapse: "collapse", minWidth: 1100 }}>
-//                 <thead>
-//                   <tr style={{ textAlign: "left", borderBottom: "1px solid var(--border)" }}>
-//                     <th style={{ padding: "10px 8px" }}>Pickup</th>
-//                     <th style={{ padding: "10px 8px" }}>Customer</th>
-//                     <th style={{ padding: "10px 8px" }}>Route</th>
-//                     <th style={{ padding: "10px 8px" }}>Driver</th>
-//                     <th style={{ padding: "10px 8px" }}>Status</th>
-//                     <th style={{ padding: "10px 8px" }}>Pricing</th>
-//                     <th style={{ padding: "10px 8px" }}>Actions</th>
-//                   </tr>
-//                 </thead>
-//
-//                 <tbody>
-//                   {bookings.map((b) => (
-//                     <tr key={b.id} style={{ borderBottom: "1px solid var(--border)" }}>
-//                       <td style={{ padding: "10px 8px" }}>
-//                         <div style={{ fontWeight: 800 }}>{formatDateTime(b.pickupTime)}</div>
-//                         <div className="muted" style={{ fontSize: 12 }}>
-//                           Token: {b.publicToken || "—"}
-//                         </div>
-//                       </td>
-//
-//                       <td style={{ padding: "10px 8px" }}>
-//                         <div style={{ fontWeight: 800 }}>{b.customerName || "—"}</div>
-//                         <div className="muted" style={{ fontSize: 12 }}>{b.customerPhone || ""}</div>
-//                         <div className="muted" style={{ fontSize: 12 }}>{b.customerEmail || ""}</div>
-//                       </td>
-//
-//                       <td style={{ padding: "10px 8px" }}>
-//                         <div title={b.pickupAddress || ""} style={{ fontWeight: 800 }}>
-//                           {shortAddress(b.pickupAddress)}
-//                         </div>
-//                         <div className="muted" title={b.dropoffAddress || ""} style={{ fontSize: 12, marginTop: 2 }}>
-//                           → {shortAddress(b.dropoffAddress)}
-//                         </div>
-//                       </td>
-//
-//                       <td style={{ padding: "10px 8px" }}>
-//                         <div style={{ fontWeight: 800 }}>
-//                           {b.driverName || (b.driverId ? `Driver #${b.driverId}` : "Unassigned")}
-//                         </div>
-//                         <div className="muted" style={{ fontSize: 12 }}>
-//                           {b.driverVehicleType ? `Driver: ${b.driverVehicleType}` : ""}
-//                           {b.driverEnabled === false ? " • (disabled)" : ""}
-//                         </div>
-//                       </td>
-//
-//                       <td style={{ padding: "10px 8px" }}>
-//                         <span style={statusBadgeStyle(b.status)}>{b.status || "UNKNOWN"}</span>
-//                       </td>
-//
-//                       <td style={{ padding: "10px 8px" }}>
-//                         <div style={{ fontWeight: 800 }}>
-//                           {b.fixedRoutePrice != null ? `$${Number(b.fixedRoutePrice).toFixed(2)}` : "—"}
-//                         </div>
-//                         <div className="muted" style={{ fontSize: 12 }}>
-//                           {b.selectedVehicleType ? `Vehicle: ${b.selectedVehicleType}` : ""}
-//                         </div>
-//                       </td>
-//
-//                       <td style={{ padding: "10px 8px" }}>
-//                         {/* Actions will be wired once you provide the real endpoints */}
-//                         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-//                           <button className="btn btnGhost" type="button" disabled title="Need API endpoint">
-//                             Assign
-//                           </button>
-//                           <button className="btn" type="button" disabled title="Need API endpoint" style={{ border: "1px solid var(--border)", background: "transparent" }}>
-//                             Complete
-//                           </button>
-//                           <button
-//                             className="btn"
-//                             type="button"
-//                             disabled
-//                             title="Need API endpoint"
-//                             style={{ border: "1px solid #fecaca", background: "#fff5f5", color: "#b91c1c", fontWeight: 900 }}
-//                           >
-//                             Cancel
-//                           </button>
-//                         </div>
-//                       </td>
-//                     </tr>
-//                   ))}
-//
-//                   {!loading && bookings.length === 0 && (
-//                     <tr>
-//                       <td colSpan={7} style={{ padding: 14 }} className="muted">
-//                         No bookings found for the selected filters.
-//                       </td>
-//                     </tr>
-//                   )}
-//                 </tbody>
-//               </table>
-//             </div>
-//           </div>
-//         </div>
-//       </section>
-//
-//       <Footer brand={brand} />
-//     </div>
-//   );
-// }
-
 import { useEffect, useMemo, useRef, useState } from "react";
 import TopBar from "../../components/TopBar";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { listAdminBookings } from "../../api/adminBookingsApi";
+import { listAdminBookings, completeAdminBooking, cancelAdminBooking } from "../../api/adminBookingsApi";
 import { assignDriver, getEligibleDrivers } from "../../api/adminAssignApi";
 import AssignDriverModal from "./components/AssignDriverModal";
 import BookingActionsMenu from "./components/BookingActionsMenu";
+import CancelBookingModal from "./components/CancelBookingModal";
 
 /** ---------- helpers ---------- */
 function formatTime(dt) {
@@ -997,6 +200,12 @@ export default function AdminDashboardPage() {
   const [assignOpen, setAssignOpen] = useState(false);
   const [assignBooking, setAssignBooking] = useState(null);
 
+  // cancel modal
+  // Cancel modal
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelBooking, setCancelBooking] = useState(null);
+  const [cancelLoading, setCancelLoading] = useState(false);
+
 //   const closeMenu = () => setMenuOpenForId(null);
 const closeMenu = () => {
   setMenuOpenForId(null);
@@ -1173,6 +382,65 @@ const closeMenu = () => {
     // reload current page after assign
     load({ resetPage: false });
   };
+
+const handleCompleteBooking = async (booking) => {
+  closeMenu();
+
+  const bookingLabel = booking?.customerName
+    ? `${booking.customerName}'s booking`
+    : `booking #${booking.id}`;
+
+  const confirmed = window.confirm(
+    `Mark ${bookingLabel} as completed?`
+  );
+
+  if (!confirmed) return;
+
+  setLoading(true);
+  setError("");
+
+  try {
+    await completeAdminBooking(booking.id);
+    setInfo(`${bookingLabel} was marked as completed.`);
+    await load({ resetPage: false });
+  } catch (e) {
+    setError(e?.message || "Failed to complete booking.");
+    setInfo("");
+  } finally {
+    setLoading(false);
+  }
+};
+
+const openCancel = (booking) => {
+  closeMenu();
+  setCancelBooking(booking);
+  setCancelOpen(true);
+};
+
+const handleCancelBooking = async (reason) => {
+  if (!cancelBooking?.id) return;
+
+  setCancelLoading(true);
+  setError("");
+
+  try {
+    await cancelAdminBooking(cancelBooking.id, reason);
+
+    const bookingLabel = cancelBooking?.customerName
+      ? `${cancelBooking.customerName}'s booking`
+      : `booking #${cancelBooking.id}`;
+
+    setInfo(`${bookingLabel} was cancelled.`);
+    setCancelOpen(false);
+    setCancelBooking(null);
+    await load({ resetPage: false });
+  } catch (e) {
+    setError(e?.message || "Failed to cancel booking.");
+    setInfo("");
+  } finally {
+    setCancelLoading(false);
+  }
+};
 
   return (
     <div ref={docClickRef}>
@@ -1583,13 +851,14 @@ const closeMenu = () => {
                         <td style={{ padding: "10px 8px" }}>
                           <div style={{ fontWeight: 900 }}>{vehicleLabel(b.selectedVehicleType)}</div>
                         </td>
-
+{/*  Desktop VERSION*/}
                         <td style={{ padding: "10px 8px" }}>
                             <BookingActionsMenu
                               booking={b}
                               menuOpen={menuOpenForId === b.id}
                               coords={menuCoords[b.id]}
                               canAssign={canAssign(b.status)}
+                              canComplete={canComplete(b.status)}
                               canCancel={canCancel(b.status)}
                               onToggleMenu={(e) => openMenuFor(b.id, e.currentTarget)}
                               onAssign={() => openAssign(b)}
@@ -1598,10 +867,8 @@ const closeMenu = () => {
                                 setInfo(ok ? "Public token copied." : "Could not copy token.");
                                 closeMenu();
                               }}
-                              onCancelBooking={() => {
-                                closeMenu();
-                                setInfo(`Cancel booking for #${b.id} will be wired next.`);
-                              }}
+                              onCompleteBooking={() => handleCompleteBooking(b)}
+                              onCancelBooking={() => openCancel(b)}
                             />
 
 
@@ -1693,12 +960,13 @@ const closeMenu = () => {
                             </button>
 
                         )}
-
+{/*  MOBILE version*/}
                         <BookingActionsMenu
                           booking={b}
                           menuOpen={menuOpenForId === b.id}
                           coords={menuCoords[b.id]}
                           canAssign={canAssign(b.status)}
+                          canComplete={canComplete(b.status)}
                           canCancel={canCancel(b.status)}
                           onToggleMenu={(e) => openMenuFor(b.id, e.currentTarget)}
                           onAssign={() => openAssign(b)}
@@ -1707,10 +975,8 @@ const closeMenu = () => {
                             setInfo(ok ? "Public token copied." : "Could not copy token.");
                             closeMenu();
                           }}
-                          onCancelBooking={() => {
-                            closeMenu();
-                            setInfo(`Cancel booking for #${b.id} will be wired next.`);
-                          }}
+                          onCompleteBooking={() => handleCompleteBooking(b)}
+                          onCancelBooking={() => openCancel(b)}
                         />
 
                       </div>
@@ -1739,6 +1005,23 @@ const closeMenu = () => {
           setInfo(m);
           setError("");
         }}
+        setGlobalError={(m) => {
+          setError(m);
+          setInfo("");
+        }}
+      />
+
+        {/*        cancel booking modal*/}
+      <CancelBookingModal
+        booking={cancelBooking}
+        open={cancelOpen}
+        loading={cancelLoading}
+        onClose={() => {
+          if (cancelLoading) return;
+          setCancelOpen(false);
+          setCancelBooking(null);
+        }}
+        onConfirm={handleCancelBooking}
         setGlobalError={(m) => {
           setError(m);
           setInfo("");
