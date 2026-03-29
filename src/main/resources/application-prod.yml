@@ -1,42 +1,53 @@
 
 spring:
   datasource:
-    url: jdbc:postgresql://your-prod-host:5432/bookingAndDispatch
-    username: taxi_user
-    password: change_me
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     driver-class-name: org.postgresql.Driver
-#    datasource:
-#      url: ${DB_URL}
-#      username: ${DB_USER}
-#      password: ${DB_PASSWORD}
+
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update   # use update for demo (safe)
     show-sql: false
-
-  mail:
-    host: smtp.yourprovider.com
-    port: 587
-    username: info@yourdomain.com
-    password: your_prod_password
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-
 server:
-  port: 8080
+  port: ${PORT:8080}
 
+#  mail:
+#    host: smtp.yourprovider.com
+#    port: 587
+#    username: info@yourdomain.com
+#    password: your_prod_password
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          starttls:
+#            enable: true
 
 app:
+  frontend-base-url: ${FRONTEND_BASE_URL}
+
   email:
+    test-on-startup: true
+    test-to-email: "mubijemal@gmail.com"
     enabled: true
     provider: brevo
-    fromEmail: no-reply@yourdomain.com
-    fromName: Seattle Blue Cab
-    adminEmail: your-test-email@gmail.com
+    from-email: tomyfreindmubi@gmail.com
+    from-name: Seattle Blue Cab
+    admin-email: tomyfriendmubi@gmail.com
     brevo:
-      apiKey: ${BREVO_API_KEY}
-  frontend-base-url:
+      api-key: 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
+
+
+
+#app:
+#  email:
+#    enabled: true
+#    provider: brevo
+#    fromEmail: no-reply@yourdomain.com
+#    fromName: Seattle Blue Cab
+#    adminEmail: your-test-email@gmail.com
+#    brevo:
+#      apiKey: ${BREVO_API_KEY}
+#  frontend-base-url:
