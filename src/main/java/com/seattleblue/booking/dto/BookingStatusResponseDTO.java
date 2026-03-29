@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 public class BookingStatusResponseDTO {
 
-    private Long bookingId;
+    private String publicToken;
     private BookingStatus status;
 
     // Pickup / dropoff details

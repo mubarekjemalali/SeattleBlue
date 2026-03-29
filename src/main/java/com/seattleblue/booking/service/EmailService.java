@@ -9,6 +9,7 @@ public interface EmailService {
     void sendAdminNewBookingEmail(Booking booking);
     void sendCustomerDriverAssignedEmail(Driver driver, Booking booking);
     void sendDriverBookingCancelledEmail(Driver driver, Booking booking);
+    void sendCustomerBookingCanelledEmail(Booking booking);
     void sendDriverAssignedEmail(Driver driver, Booking booking);
     void sendAdminBookingCancelledEmail(Booking booking);
     void sendDriverUnassignedEmail(Driver oldDriver, Booking booking);

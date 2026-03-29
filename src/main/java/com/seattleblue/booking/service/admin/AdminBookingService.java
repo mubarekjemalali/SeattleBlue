@@ -23,7 +23,7 @@ public class AdminBookingService {
 
     @Transactional(readOnly = true)
     public Page<AdminBookingSummaryDto> listBookings(
-            BookingStatus status,
+            String status,
             LocalDateTime from,
             LocalDateTime to,
             String q,
@@ -46,7 +46,11 @@ public class AdminBookingService {
                 .publicToken(b.getPublicToken())
                 .status(b.getStatus())
 
-                .customerName(b.getCustomerFirstName() + " " + b.getCustomerLastName())
+                .customerName(
+                        ((b.getCustomerFirstName() == null) ? "" : b.getCustomerFirstName()) +
+                                " " +
+                                ((b.getCustomerLastName() == null) ? "" : b.getCustomerLastName())
+                )
                 .customerPhone(b.getCustomerPhoneNumber())
                 .customerEmail(b.getCustomerEmail())
 
@@ -55,11 +59,15 @@ public class AdminBookingService {
                 .pickupTime(b.getPickupTime())
 
                 .selectedVehicleType(b.getSelectedVehicleType())
-                .fixedRoutePrice(b.getFixedRoutePrice())
+                .fixedRoutePrice(b.getFixedRoutePrice() == null ? null : b.getFixedRoutePrice().doubleValue())
 
                 .driverId(d == null ? null : d.getId())
-                .driverName(d == null ? null : (d.getFirstName() + " " + d.getLastName()))
-                .driverVehicleType(d == null ? null : d.getVehicle().getVehicleType())
+                .driverName(d == null ? null :
+                        ((d.getFirstName() == null) ? "" : d.getFirstName()) +
+                                " " +
+                                ((d.getLastName() == null) ? "" : d.getLastName())
+                )
+                .driverVehicleType(d == null || d.getVehicle() == null ? null : d.getVehicle().getVehicleType())
                 .driverEnabled(d == null ? null : d.isEnabled())
                 .build();
     }

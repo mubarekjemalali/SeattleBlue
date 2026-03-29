@@ -6,6 +6,7 @@ import com.seattleblue.booking.domain.Booking;
 import com.seattleblue.booking.domain.Driver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.HttpHeaders;
@@ -28,6 +29,9 @@ import java.util.Map;
 public class BrevoEmailService implements EmailService {
 
     private final EmailProperties props;
+
+    @Value("${app.frontend-base-url}")
+    private String frontendBaseUrl;
 
     private RestClient brevoClient() {
        return RestClient.builder()
@@ -60,11 +64,12 @@ public class BrevoEmailService implements EmailService {
 
     @Override
     public void sendCustomerBookingCreatedEmail(Booking booking) {
+        String manageUrl = frontendBaseUrl + "/manage-booking?token=" + booking.getPublicToken();
         send(
                 booking.getCustomerEmail(),
                 booking.getCustomer().getFullName(),
                 "Booking Confirmation",
-                EmailTemplates.customerBookingCreatedHtml(booking)
+                EmailTemplates.customerBookingCreatedHtml(booking, manageUrl)
         );
     }
 
@@ -80,11 +85,13 @@ public class BrevoEmailService implements EmailService {
 
     @Override
     public void sendCustomerDriverAssignedEmail(Driver driver, Booking booking) {
+        String manageUrl = frontendBaseUrl + "/manage-booking?token=" + booking.getPublicToken();
+
         send(
-                driver.getEmail(),
-                driver.getFirstName(),
-                "New Ride Assigned",
-                EmailTemplates.driverAssignedHtml(driver, booking)
+                booking.getCustomerEmail(),
+                booking.getCustomer().getFullName(),
+                "Your Driver Is Assigned",
+                EmailTemplates.customerDriverAssignedHtml(driver, booking, manageUrl)
         );
     }
 
@@ -99,8 +106,23 @@ public class BrevoEmailService implements EmailService {
     }
 
     @Override
-    public void sendDriverAssignedEmail(Driver driver, Booking booking) {
+    public void sendCustomerBookingCanelledEmail(Booking booking) {
+        send(
+                booking.getCustomerEmail(),
+                booking.getCustomer().getFullName(),
+                "Booking Cancelled",
+                EmailTemplates.customerCancelledHtml(booking)
+        );
+    }
 
+    @Override
+    public void sendDriverAssignedEmail(Driver driver, Booking booking) {
+        send(
+                driver.getEmail(),
+                driver.getFirstName(),
+                "New Ride Assigned",
+                EmailTemplates.driverAssignedHtml(driver, booking)
+        );
     }
 
     @Override
@@ -135,21 +157,23 @@ public class BrevoEmailService implements EmailService {
 
     @Override
     public void sendCustomerBookingCancelledByDispatcherEmail(Booking booking, String reason) {
+        String manageUrl = frontendBaseUrl + "/manage-booking?token=" + booking.getPublicToken();
         send(
                 booking.getCustomerEmail(),
                 booking.getCustomer().getFullName(),
                 "Booking Cancelled",
-                EmailTemplates.customerCancelledByDispatcherHtml(booking, reason)
+                EmailTemplates.customerCancelledByDispatcherHtml(booking, reason, manageUrl)
         );
     }
 
     @Override
     public void sendCustomerTripCompletedEmail(Booking booking) {
+        String manageUrl = frontendBaseUrl + "/manage-booking?token=" + booking.getPublicToken();
         send(
                 booking.getCustomerEmail(),
                 booking.getCustomer().getFullName(),
                 "Trip Completed",
-                EmailTemplates.customerTripCompletedHtml(booking)
+                EmailTemplates.customerTripCompletedHtml(booking, manageUrl)
         );
     }
 

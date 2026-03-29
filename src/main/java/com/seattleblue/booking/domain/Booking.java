@@ -2,6 +2,8 @@ package com.seattleblue.booking.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -55,10 +57,10 @@ public class Booking {
     @Column(name = "pickup_address", nullable = false)
     private String pickupAddress;
 
-    @Column(name = "pickup_lat", nullable = false)
+    @Column(name = "pickup_lat", nullable = true)
     private Double pickupLat;
 
-    @Column(name = "pickup_lng", nullable = false)
+    @Column(name = "pickup_lng", nullable = true)
     private Double pickupLng;
 
     // ============================
@@ -68,10 +70,10 @@ public class Booking {
     @Column(name = "dropoff_address", nullable = false)
     private String dropoffAddress;
 
-    @Column(name = "dropoff_lat", nullable = false)
+    @Column(name = "dropoff_lat", nullable = true)
     private Double dropoffLat;
 
-    @Column(name = "dropoff_lng", nullable = false)
+    @Column(name = "dropoff_lng", nullable = true)
     private Double dropoffLng;
 
     // ============================
@@ -102,7 +104,7 @@ public class Booking {
     private FixedRoute fixedRoute;
 
     @Column(name = "fixed_route_price")
-    private Double fixedRoutePrice; // Optional: set only when fixedRoute is used
+    private BigDecimal fixedRoutePrice; // Optional: set only when fixedRoute is used
 
     /**
      * The calculated distance-based fare (if applicable).
@@ -113,6 +115,9 @@ public class Booking {
 
     @Column(name = "distance_miles")
     private Double distanceMiles;
+
+    @Column(name = "notes", length = 2000)
+    private String notes;
 
     // ============================
     // Status & lifecycle

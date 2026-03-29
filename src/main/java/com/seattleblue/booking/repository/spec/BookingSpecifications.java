@@ -10,10 +10,34 @@ public final class BookingSpecifications {
 
     private BookingSpecifications() {}
 
-    public static Specification<Booking> hasStatus(BookingStatus status) {
-        return (root, query, cb) ->
-                status == null ? cb.conjunction() : cb.equal(root.get("status"), status);
-    }
+//    public static Specification<Booking> hasStatus(String status) {
+//        return (root, query, cb) ->
+//                status == null ? cb.conjunction() : cb.equal(root.get("status"), status);
+//    }
+public static Specification<Booking> hasStatus(String status) {
+    return (root, query, cb) -> {
+        if (status == null || status.isBlank()) {
+            return cb.conjunction();
+        }
+
+        String normalized = status.trim().toUpperCase();
+
+        if ("CANCELLED".equals(normalized)) {
+            return root.get("status").in(
+                    BookingStatus.CANCELLED_BY_CUSTOMER,
+                    BookingStatus.CANCELLED_BY_DISPATCHER
+            );
+        }
+
+        try {
+            BookingStatus bookingStatus = BookingStatus.valueOf(normalized);
+            return cb.equal(root.get("status"), bookingStatus);
+        } catch (IllegalArgumentException ex) {
+            // Unknown status value: return no rows instead of throwing
+            return cb.disjunction();
+        }
+    };
+}
 
     public static Specification<Booking> pickupTimeFrom(LocalDateTime from) {
         return (root, query, cb) ->
@@ -34,11 +58,16 @@ public final class BookingSpecifications {
             if (q == null || q.isBlank()) return cb.conjunction();
 
             String like = "%" + q.trim().toLowerCase() + "%";
+            var firstName = cb.lower(root.get("customerFirstName"));
+            var lastName = cb.lower(root.get("customerLastName"));
+            var fullName = cb.lower(cb.concat(cb.concat(root.get("customerFirstName"), " "), root.get("customerLastName")));
 
             return cb.or(
-                    cb.like(cb.lower(root.get("customerNameSnapshot")), like),
-                    cb.like(cb.lower(root.get("customerPhoneSnapshot")), like),
-                    cb.like(cb.lower(root.get("customerEmailSnapshot")), like)
+                    cb.like(firstName, like),
+                    cb.like(lastName, like),
+                    cb.like(fullName, like),
+                    cb.like(cb.lower(root.get("customerPhoneNumber")), like),
+                    cb.like(cb.lower(root.get("customerEmail")), like)
             );
         };
     }

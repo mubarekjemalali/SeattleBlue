@@ -3,11 +3,24 @@ package com.seattleblue.booking.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
+
+/**
+ * Pricing for a fixed route per vehicle type.
+ * Example: Route "Airport -> Downtown", VehicleType SEDAN_4, Price 40.00
+ */
 @Entity
-@Table(name = "fixed_route_rates")
-@Data
+@Table(
+        name = "fixed_route_rate",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_fixed_route_vehicle_type",
+                columnNames = {"fixed_route_id", "vehicle_type"}
+        )
+)
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class FixedRouteRate {
 
     @Id
@@ -15,22 +28,19 @@ public class FixedRouteRate {
     private Long id;
 
     /**
-     * Parent fixed route.
+     * Many rates belong to one fixed route.
      */
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "route_id")
-    private FixedRoute route;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "fixed_route_id", nullable = false)
+    private FixedRoute fixedRoute;
 
-    /**
-     * Vehicle type (e.g., SEDAN_4, SUV_6, VAN_10).
-     */
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "vehicle_type", nullable = false)
     private VehicleType vehicleType;
 
     /**
-     * Flat rate price for this combination.
+     * BigDecimal is safer for money than double.
      */
-    @Column(nullable = false)
-    private Double price;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 }
