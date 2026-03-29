@@ -20,8 +20,8 @@ spring:
     init:
       mode: never
 
-  profiles:
-    active: dev  # default profile
+#  profiles:
+#    active: dev  # default profile
 
 logging:
   level:
@@ -33,9 +33,9 @@ app:
   email:
     enabled: false # dev default: log only
     provider: local # brevo | local
-    fromEmail: test@localhost"
-    fromName: "Seattle Blue Cab"
-    adminEmail: "dispatch@loclhost"
+    fromEmail: test@localhost
+    fromName: Seattle Blue Cab
+    adminEmail: dispatch@loclhost
     brevo:
       apiKey: "" # set in prod using env var
     frontend-base-url: http://localhost:5173

@@ -7,8 +7,7 @@ import com.seattleblue.booking.domain.Driver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperties;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -20,12 +19,9 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@ConditionalOnProperties({
-        @ConditionalOnProperty(prefix = "app.email", name = "enabled", havingValue = "true"),
-        @ConditionalOnProperty(prefix = "app.email", name = "provider", havingValue = "brevo")
-})
-// NOTE: If your Spring version doesn’t support multiple values in havingValue,
-// we can replace this with a small @Configuration that registers the bean conditionally.
+@ConditionalOnExpression(
+        "'${app.email.enabled:false}' == 'true' && '${app.email.provider:}' == 'brevo'"
+)
 public class BrevoEmailService implements EmailService {
 
     private final EmailProperties props;
@@ -34,7 +30,7 @@ public class BrevoEmailService implements EmailService {
     private String frontendBaseUrl;
 
     private RestClient brevoClient() {
-       return RestClient.builder()
+        return RestClient.builder()
                 .baseUrl("https://api.brevo.com/v3")
                 .defaultHeader("api-key", props.getBrevo().getApiKey())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -42,7 +38,6 @@ public class BrevoEmailService implements EmailService {
     }
 
     private void send(String toEmail, String toName, String subject, String htmlContent) {
-
         if (toEmail == null || toEmail.isBlank()) {
             log.warn("Skipping email: missing toEmail. Subject={}", subject);
             return;
@@ -187,14 +182,13 @@ public class BrevoEmailService implements EmailService {
         );
     }
 
-
-
     @Override
-    public void sendTestEmail(){
-        send("tomyfriendmubi@gmail.com",
+    public void sendTestEmail() {
+        send(
+                "tomyfriendmubi@gmail.com",
                 "test",
                 "Test Email",
                 "This is just a test message, we want to confirm if the email functionality works and if it is reliable "
-                );
+        );
     }
 }
