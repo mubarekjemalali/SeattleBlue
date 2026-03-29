@@ -33,11 +33,11 @@ public class Driver {
     private String lastName;
 
     @NotBlank
-    @Column(name = "phone_number", nullable = false)
+    @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
     @Email
-    @Column(name = "email")
+    @Column(name = "email", nullable = false, unique = true)
     private String email; // optional
 
     @Column(nullable = false)

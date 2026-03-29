@@ -128,3 +128,362 @@ button{ font-family:inherit; }
 .adminMenuItemDanger:hover {
   background: #fff5f5;
 }
+
+.mobileOnlyLabel {
+  display: none;
+}
+
+.desktopOnlyLabel {
+  display: inline;
+}
+
+@media (max-width: 900px) {
+  .publicNavbarActions {
+    gap: 8px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .desktopOnlyLabel {
+    display: none;
+  }
+
+  .mobileOnlyLabel {
+    display: inline;
+  }
+}
+
+.topBarShell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 0;
+  flex-wrap: wrap;
+}
+
+.topBarLeft {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.topBarRight {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.topBarSocials {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.topBarPill {
+  white-space: nowrap;
+}
+
+.topBarDesktopOnly {
+  display: flex;
+}
+
+@media (max-width: 900px) {
+  .topBarShell {
+    min-height: 30px;
+    padding: 0;
+  }
+
+  .topBarDesktopOnly {
+    display: none !important;
+  }
+  .hideOnSmallScreen {
+      display: none !important;
+    }
+
+}
+.aboutHeroSection {
+  background: linear-gradient(180deg, #0b3e91 0%, #1258c8 45%, #dcecff 100%);
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+.aboutHeroLayout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+  align-items: center;
+}
+
+.aboutHeroText {
+  color: #fff;
+}
+
+.aboutEyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.aboutHeroTitle {
+  margin: 8px 0 0;
+  font-size: clamp(30px, 5vw, 48px);
+  line-height: 1.08;
+  font-weight: 900;
+  color: #fff;
+}
+
+.aboutHeroBody {
+  margin-top: 14px;
+  font-size: 16px;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.94);
+  max-width: 760px;
+}
+
+.aboutHeroActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.aboutHeroGhostBtn {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.aboutHeroMedia {
+
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.aboutHeroImage {
+  width: 100%;
+  height: 280px;
+  object-fit: cover;
+  display: block;
+  border-radius: 14px;
+}
+
+.aboutSectionTight {
+  padding-top: 18px;
+  padding-bottom: 18px;
+}
+
+.aboutProfileGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.aboutDarkCard {
+  padding: 22px;
+  background: linear-gradient(180deg, #0e4aa7 0%, #0b3e91 100%);
+  color: #fff;
+  border: 1px solid rgba(10, 54, 125, 0.22);
+}
+
+.aboutLightFeatureCard {
+  padding: 22px;
+  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+  border: 1px solid #d7e7ff;
+}
+
+.aboutStatementCard {
+  padding: 24px;
+  background: linear-gradient(180deg, #e5f0ff 0%, #ffffff 100%);
+  border: 1px solid #cfe0ff;
+}
+
+.aboutCtaCard {
+  padding: 22px;
+  background: linear-gradient(180deg, #1258c8 0%, #0b3e91 100%);
+  color: #fff;
+  border: 1px solid rgba(10, 54, 125, 0.24);
+}
+
+.aboutSectionLabel,
+.aboutSectionLabelBlue,
+.aboutSectionLabelLight {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.aboutSectionLabel {
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.aboutSectionLabelBlue {
+  color: #1258c8;
+}
+
+.aboutSectionLabelLight {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.aboutSectionTitleLight {
+  margin: 8px 0 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 900;
+  color: #fff;
+}
+
+.aboutSectionTitleDark {
+  margin: 8px 0 0;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 900;
+  color: #0b3e91;
+}
+
+.aboutSectionBodyLight {
+  margin-top: 12px;
+  line-height: 1.8;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.aboutSectionBodyDark {
+  margin-top: 12px;
+  line-height: 1.8;
+  color: #35506f;
+}
+
+.aboutValueList {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.aboutValueItem {
+  border: 1px solid #d7e7ff;
+  background: #fff;
+  color: #0b3e91;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-weight: 700;
+}
+
+.aboutBlockHeader {
+  margin-bottom: 14px;
+}
+
+.aboutBlockTitle {
+  margin: 6px 0 0;
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 900;
+  color: #0b3e91;
+}
+
+.aboutBlockBody {
+  margin-top: 10px;
+  line-height: 1.75;
+  color: #48627f;
+  max-width: 820px;
+}
+
+.aboutServicesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.aboutServiceCard {
+  padding: 18px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #ffffff 0%, #f2f7ff 100%);
+  border: 1px solid #dbe9ff;
+}
+
+.aboutServiceTitle {
+  color: #0b3e91;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.aboutFleetGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.aboutFleetGridCard {
+  overflow: hidden;
+  border-radius: 20px;
+  padding: 0;
+  background: #fff;
+  border: 1px solid #d9e8ff;
+}
+
+.aboutFleetImage {
+  width: 100%;
+  height: 210px;
+  object-fit: cover;
+  display: block;
+}
+
+.aboutFleetBody {
+  padding: 18px;
+}
+
+.aboutFleetTitle {
+  font-size: 22px;
+  font-weight: 900;
+  color: #0b3e91;
+}
+
+.aboutFleetText {
+  margin-top: 8px;
+  line-height: 1.75;
+  color: #48627f;
+}
+
+@media (min-width: 700px) {
+  .aboutServicesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .aboutFleetGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 960px) {
+  .aboutHeroSection {
+    padding-top: 34px;
+    padding-bottom: 34px;
+  }
+
+  .aboutHeroLayout {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 28px;
+  }
+
+  .aboutProfileGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .aboutServicesGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .aboutFleetGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .aboutHeroImage {
+    height: 360px;
+  }
+}

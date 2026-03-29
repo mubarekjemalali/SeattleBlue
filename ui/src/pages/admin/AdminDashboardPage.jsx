@@ -7,6 +7,7 @@ import { assignDriver, getEligibleDrivers } from "../../api/adminAssignApi";
 import AssignDriverModal from "./components/AssignDriverModal";
 import BookingActionsMenu from "./components/BookingActionsMenu";
 import CancelBookingModal from "./components/CancelBookingModal";
+import AdminSectionNav from "./components/AdminSectionNav";
 
 /** ---------- helpers ---------- */
 function formatTime(dt) {
@@ -206,6 +207,20 @@ export default function AdminDashboardPage() {
   const [cancelBooking, setCancelBooking] = useState(null);
   const [cancelLoading, setCancelLoading] = useState(false);
 
+
+  const cacheRef = useRef({});
+
+  const buildCacheKey = ({ status, from, to, q, page, size, sort }) =>
+    JSON.stringify({
+      status: status || "",
+      from: from || "",
+      to: to || "",
+      q: q || "",
+      page,
+      size,
+      sort,
+    });
+
 //   const closeMenu = () => setMenuOpenForId(null);
 const closeMenu = () => {
   setMenuOpenForId(null);
@@ -293,31 +308,68 @@ const closeMenu = () => {
       setMenuOpenForId(bookingId);
     };
 
-  const load = async ({ resetPage = false } = {}) => {
-    setLoading(true);
-    setError("");
-    // keep info unless caller sets it
-    try {
-      const nextPage = resetPage ? 0 : page;
+//   const load = async ({ resetPage = false } = {}) => {
+//     setLoading(true);
+//     setError("");
+//     // keep info unless caller sets it
+//     try {
+//       const nextPage = resetPage ? 0 : page;
+//
+//       const res = await listAdminBookings({
+//         status: status || undefined,
+//         from: fromLocal ? toIsoLocalDateTime(fromLocal) : undefined,
+//         to: toLocal ? toIsoLocalDateTime(toLocal) : undefined,
+//         q: q || undefined,
+//         page: nextPage,
+//         size,
+//         sort,
+//       });
+//
+//       setPageData(res);
+//       if (resetPage) setPage(0);
+//     } catch (e) {
+//       setError(e?.message || "Failed to load bookings.");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-      const res = await listAdminBookings({
-        status: status || undefined,
-        from: fromLocal ? toIsoLocalDateTime(fromLocal) : undefined,
-        to: toLocal ? toIsoLocalDateTime(toLocal) : undefined,
-        q: q || undefined,
-        page: nextPage,
-        size,
-        sort,
-      });
+const load = async ({ resetPage = false, force = false } = {}) => {
+  setLoading(true);
+  setError("");
 
-      setPageData(res);
+  try {
+    const nextPage = resetPage ? 0 : page;
+
+    const params = {
+      status: status || undefined,
+      from: fromLocal ? toIsoLocalDateTime(fromLocal) : undefined,
+      to: toLocal ? toIsoLocalDateTime(toLocal) : undefined,
+      q: q || undefined,
+      page: nextPage,
+      size,
+      sort,
+    };
+
+    const cacheKey = buildCacheKey(params);
+
+    if (!force && cacheRef.current[cacheKey]) {
+      setPageData(cacheRef.current[cacheKey]);
       if (resetPage) setPage(0);
-    } catch (e) {
-      setError(e?.message || "Failed to load bookings.");
-    } finally {
-      setLoading(false);
+      return;
     }
-  };
+
+    const res = await listAdminBookings(params);
+    cacheRef.current[cacheKey] = res;
+
+    setPageData(res);
+    if (resetPage) setPage(0);
+  } catch (e) {
+    setError(e?.message || "Failed to load bookings.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     const s = defaultStatusForTab(tab);
@@ -402,7 +454,8 @@ const handleCompleteBooking = async (booking) => {
   try {
     await completeAdminBooking(booking.id);
     setInfo(`${bookingLabel} was marked as completed.`);
-    await load({ resetPage: false });
+//     await load({ resetPage: false });
+    await load({ resetPage: false, force: true });
   } catch (e) {
     setError(e?.message || "Failed to complete booking.");
     setInfo("");
@@ -433,7 +486,8 @@ const handleCancelBooking = async (reason) => {
     setInfo(`${bookingLabel} was cancelled.`);
     setCancelOpen(false);
     setCancelBooking(null);
-    await load({ resetPage: false });
+//     await load({ resetPage: false });
+    await load({ resetPage: false, force: true });
   } catch (e) {
     setError(e?.message || "Failed to cancel booking.");
     setInfo("");
@@ -444,31 +498,46 @@ const handleCancelBooking = async (reason) => {
 
   return (
     <div ref={docClickRef}>
-      <TopBar brand={brand} />
-      <Navbar brand={brand} />
+     <TopBar brand={brand} adminMode />
+     <Navbar brand={brand} adminMode />
+
 
       {/* Header + tabs */}
-      <section className="section" style={{ background: "linear-gradient(180deg, var(--blue-50), #ffffff)" }}>
-        <div className="container">
-          <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div>
-              <div className="kicker">Admin</div>
-              <h1 className="h1" style={{ marginBottom: 6 }}>Dashboard</h1>
-              <div className="muted" style={{ lineHeight: 1.6 }}>
-                View dispatcher bookings. Assign drivers and manage active trips.
-              </div>
+      <section
+        className="section"
+        style={{
+          background: "linear-gradient(180deg, var(--blue-50), #ffffff)",
+          paddingTop: 16,
+          paddingBottom: 12,
+        }}
+      >
+        <div className="container" style={{ display: "grid", gap: 12 }}>
+          {/* Admin intro */}
+          <div>
+            <div className="kicker">Admin</div>
+            <h1 style={{ margin: "4px 0 0", fontSize: 28, fontWeight: 900 }}>
+              Dashboard
+            </h1>
+            <div className="muted" style={{ lineHeight: 1.5, marginTop: 6 }}>
+              Manage bookings and navigate to other admin tools.
             </div>
-
-            <button className="btn btnGhost" onClick={() => load()} disabled={loading}>
-              {loading ? "Refreshing..." : "Refresh"}
-            </button>
           </div>
 
-          {/* Tabs */}
+          {/* Admin page navigation */}
+          <AdminSectionNav />
+
+          {/* Booking section intro */}
+          <div>
+            <div style={{ fontWeight: 900, fontSize: 18 }}>Bookings</div>
+            <div className="muted" style={{ lineHeight: 1.5, marginTop: 4 }}>
+              Review active trips, completed bookings, and search booking records.
+            </div>
+          </div>
+
+          {/* Booking tabs */}
           <div
             className="card"
             style={{
-              marginTop: 16,
               padding: 10,
               display: "flex",
               gap: 10,
@@ -500,6 +569,71 @@ const handleCancelBooking = async (reason) => {
           </div>
         </div>
       </section>
+{/*       <section className="section" style={{ background: "linear-gradient(180deg, var(--blue-50), #ffffff)" }}> */}
+{/*         <div className="container"> */}
+{/*           <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}> */}
+{/*             <div> */}
+{/*               <div className="kicker">Admin</div> */}
+{/*               <h1 className="h1" style={{ marginBottom: 6 }}>Dashboard</h1> */}
+{/*               <div className="muted" style={{ lineHeight: 1.6 }}> */}
+{/*                 Manage bookings, drivers and more. */}
+{/*               </div> */}
+{/*             </div> */}
+{/*           </div> */}
+{/*         </div> */}
+{/*       </section> */}
+{/*                   <section className="section" style={{ paddingTop: 0 }}> */}
+{/*                           <div className="container" style={{ display: "grid", gap: 12 }}> */}
+{/*                               <AdminSectionNav /> */}
+{/*                               </div> */}
+{/*                   </section> */}
+
+{/*      <section className="section" style={{ background: "linear-gradient(180deg, var(--blue-50), #ffffff)" }}> */}
+{/*             <div className="container"> */}
+{/*               <div style={{ display: "flex", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}> */}
+
+
+{/*           </div> */}
+{/*           <div className="muted" style={{ lineHeight: 1.6 }}> */}
+{/*              Manage bookings. */}
+{/*           </div> */}
+
+{/*            */}{/* Tabs */}
+{/*           <div */}
+{/*             className="card" */}
+{/*             style={{ */}
+{/*               marginTop: 16, */}
+{/*               padding: 10, */}
+{/*               display: "flex", */}
+{/*               gap: 10, */}
+{/*               borderRadius: 16, */}
+{/*               flexWrap: "wrap", */}
+{/*             }} */}
+{/*           > */}
+{/*             {[ */}
+{/*               { key: "ACTIVE", label: "Active" }, */}
+{/*               { key: "COMPLETED", label: "Completed" }, */}
+{/*               { key: "ALL", label: "All" }, */}
+{/*             ].map((t) => ( */}
+{/*               <button */}
+{/*                 key={t.key} */}
+{/*                 type="button" */}
+{/*                 className="btn" */}
+{/*                 onClick={() => setTab(t.key)} */}
+{/*                 style={{ */}
+{/*                   flex: 1, */}
+{/*                   minWidth: 160, */}
+{/*                   background: tab === t.key ? "var(--blue-900)" : "transparent", */}
+{/*                   color: tab === t.key ? "#fff" : "var(--text)", */}
+{/*                   border: tab === t.key ? "0" : "1px solid var(--border)", */}
+{/*                 }} */}
+{/*               > */}
+{/*                 {t.label} */}
+{/*               </button> */}
+{/*             ))} */}
+{/*           </div> */}
+{/*         </div> */}
+{/*       </section> */}
 
       {/* Filters + messages + bookings */}
       <section className="section" style={{ paddingTop: 0 }}>

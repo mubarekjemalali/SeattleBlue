@@ -36,10 +36,14 @@ public class AdminDriverService {
         if (driverRepository.existsByPhoneNumber(req.getPhoneNumber())) {
             throw new ResponseStatusException(CONFLICT, "Driver phone number already exists");
         }
+        if (driverRepository.existsByEmailIgnoreCase(req.getEmail())) {
+            throw new ResponseStatusException(CONFLICT, "Driver email already exists");
+        }
 
         Vehicle v = new Vehicle();
         v.setVehicleType(req.getVehicle().getVehicleType());
         v.setPlateNumber(req.getVehicle().getVehiclePlate());
+        v.setSideNumber(req.getVehicle().getSideNumber());
         v.setMake(req.getVehicle().getMake());
         v.setModel(req.getVehicle().getModel());
         v.setYear(req.getVehicle().getYear());
@@ -48,14 +52,14 @@ public class AdminDriverService {
         v = vehicleRepository.save(v);
 
         Driver d = new Driver();
-        d.setFirstName(req.getFirstName());
-        d.setLastName(req.getLastName());
+        d.setFirstName(req.getFirstName().trim().toLowerCase());
+        d.setLastName(req.getLastName().trim().toLowerCase());
         d.setPhoneNumber(req.getPhoneNumber());
-        d.setEmail(req.getEmail());
+        d.setEmail(req.getEmail().trim().toLowerCase());
 
         // defaults for new drivers
         d.setEnabled(true);
-        d.setOnlineStatus(false);
+        d.setOnlineStatus(true);
 
         d.setVehicle(v);
 
@@ -121,21 +125,18 @@ public class AdminDriverService {
                 .orElseThrow(() -> new ResponseStatusException(NOT_FOUND, "Driver not found"));
 
         // Prevent duplicate phone number on another driver
-        boolean phoneExistsOnAnotherDriver = driverRepository.findAll().stream()
-                .anyMatch(d ->
-                        !d.getId().equals(driverId) &&
-                                d.getPhoneNumber() != null &&
-                                d.getPhoneNumber().equals(req.getPhoneNumber())
-                );
 
-        if (phoneExistsOnAnotherDriver) {
+        if (driverRepository.existsByPhoneNumberAndIdNot(req.getPhoneNumber(), driverId)) {
             throw new ResponseStatusException(CONFLICT, "Driver phone number already exists");
         }
+        if (driverRepository.existsByEmailIgnoreCaseAndIdNot(req.getEmail(), driverId)) {
+            throw new ResponseStatusException(CONFLICT, "Driver email already exists");
+        }
 
-        driver.setFirstName(req.getFirstName());
-        driver.setLastName(req.getLastName());
+        driver.setFirstName(req.getFirstName().trim().toLowerCase());
+        driver.setLastName(req.getLastName().trim().toLowerCase());
         driver.setPhoneNumber(req.getPhoneNumber());
-        driver.setEmail(req.getEmail());
+        driver.setEmail(req.getEmail().trim().toLowerCase());
 
         Vehicle vehicle = driver.getVehicle();
         if (vehicle == null) {

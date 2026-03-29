@@ -22,6 +22,7 @@ public class CreateDriverRequestDto {
     private String phoneNumber;
 
     @Email
+    @NotBlank
     private String email; // optional
 
     // Vehicle details (required for assignment workflows)

@@ -59,22 +59,32 @@
 //   );
 // }
 
-
 import { Link, useNavigate } from "react-router-dom";
 
-export default function Navbar({ brand, onBookNow }) {
+export default function Navbar({ brand, onBookNow, adminMode = false }) {
   const navigate = useNavigate();
 
   return (
-    <div style={{ background: "#fff", borderBottom: "1px solid var(--border)", position: "sticky", top: 0, zIndex: 50 }}>
-      <div className="container" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 0" }}>
-        {/*
-          LOGO:
-          Put your cleaned logo in:
-            UI/public/blue_for_hire_clean_transparent.png
-          Later you can replace that file without changing code.
-        */}
-        <Link to="/" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <div
+      style={{
+        background: "#fff",
+        borderBottom: "1px solid var(--border)",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+      }}
+    >
+      <div
+        className="container"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          padding: "14px 0",
+        }}
+      >
+        <Link to={adminMode ? "/admin/dashboard" : "/"} style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <img
             src="/blue_for_hire_clean_transparent.png"
             alt={`${brand.companyName} Logo`}
@@ -83,22 +93,38 @@ export default function Navbar({ brand, onBookNow }) {
 
           <div style={{ lineHeight: 1.1 }}>
             <div style={{ fontWeight: 900 }}>{brand.companyName}</div>
-            <div className="muted" style={{ fontSize: 12 }}>Taxi • Airport • Vans</div>
+            <div className="muted" style={{ fontSize: 12 }}>
+              {adminMode ? "Admin Portal" : "Taxi • Airport • Vans"}
+            </div>
           </div>
         </Link>
 
-        {/* Simple links (minimal for now) */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          {/* Keep this for now if you still want scroll-to-booking on homepage sections */}
-          {/* On booking page, we go directly to /booking */}
-          <button className="btn btnGhost" onClick={() => navigate("/booking")}>
-            Book Now
-          </button>
+        {!adminMode && (
+          <div
+            className="publicNavbarActions hideOnSmallScreen"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              flexWrap: "wrap",
+              justifyContent: "flex-end",
+            }}
+          >
+            <button className="btn btnGhost" onClick={() => navigate("/booking")}>
+              <span className="desktopOnlyLabel">Book Now</span>
+              <span className="mobileOnlyLabel">Book</span>
+            </button>
+            <button className="btn btnGhost" onClick={() => navigate("/contact")}>
+              <span className="desktopOnlyLabel">Contact Us</span>
+              <span className="mobileOnlyLabel">Contact</span>
+            </button>
 
-          <a className="btn btnPrimary" href={`tel:${brand.phoneDial}`}>
-            Need help? Call
-          </a>
-        </div>
+            <a className="btn btnPrimary" href={`tel:${brand.phoneDial}`}>
+              <span className="desktopOnlyLabel">Need help? Call</span>
+              <span className="mobileOnlyLabel">Call</span>
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
