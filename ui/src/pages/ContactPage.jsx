@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import TopBar from "../components/TopBar";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
-import { submitContactMessage } from "../api/contactApi";
+import { submitContactMessage } from "../api/ContactApi";
 
 const INITIAL_FORM = {
   fullName: "",
