@@ -34,7 +34,7 @@ export default function BookingActionsMenu({
             top: coords.top,
             left: coords.left,
             zIndex: 9999,
-            maxWidth: "max-content",
+//             maxWidth: "max-content",
             maxWidth:170
 
           }}

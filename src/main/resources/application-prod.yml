@@ -39,8 +39,6 @@ app:
     brevo:
       api-key: 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
 
-
-
 #app:
 #  email:
 #    enabled: true
